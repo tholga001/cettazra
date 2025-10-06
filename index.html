@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tolga & Azra</title>
+<style>
+body {
+  margin:0; padding:0;
+  font-family:'Arial',sans-serif;
+  color:#5a1a2a;
+  text-align:center;
+  overflow-x:hidden;
+  position:relative;
+  /* Normal Arka Plan */
+  background: linear-gradient(#a0c4ff, #f0f8ff);
+  transition: background 2s;
+}
+
+/* Yıl Dönümü Teması (Daha Yumuşak Romantik Geçiş) */
+.anniversary-theme {
+    /* Soft, lüks pembe gradient */
+    background: linear-gradient(to bottom, #ffe4e1, #ffc0cb, #f0f8ff) !important; 
+}
+
+/* Efektler: Kar ve kalpler */
+#effects { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden; }
+.snowflake, .heart { position:absolute; border-radius:50%; opacity:0.8; }
+.snowflake { width:6px; height:6px; background:white; animation:fall linear infinite; }
+/* Kalpleri daha büyük ve koyu pembe yapıyoruz */
+.heart { 
+    width:16px; 
+    height:16px; 
+    background:#ff4d88; 
+    clip-path: polygon(50% 0%, 61% 13%, 75% 25%, 50% 100%, 25% 25%, 39% 13%); 
+    animation:fall linear infinite; 
+}
+
+@keyframes fall {0%{transform:translateY(-10px) rotate(0deg);} 100%{transform:translateY(110vh) rotate(360deg); opacity:0;} }
+
+/* Yıl Dönümü Havai Fişek Efekti */
+.firework {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #FFD700; /* Altın Rengi */
+    border-radius: 50%;
+    opacity: 0;
+    animation: explode 1.5s ease-out;
+}
+
+@keyframes explode {
+    0% { transform: scale(1) translate(0, 0); opacity: 1; }
+    50% { opacity: 1; }
+    100% { transform: scale(0) translate(var(--end-x), var(--end-y)); opacity: 0; }
+}
+
+/* Yıl Dönümü Kartı Parlama Efekti */
+.anniversary-card-pulse {
+    animation: pulse 1.5s infinite alternate;
+    border: 4px solid #ff1493 !important; /* Deep Pink Border */
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 10px #ff1493, 0 0 20px rgba(255, 20, 147, 0.5); }
+    100% { box-shadow: 0 0 20px #ff1493, 0 0 30px rgba(255, 20, 147, 0.8); }
+}
+
+
+/* Başlık */
+h1 {margin:20px 0; font-size:48px; text-shadow:2px 2px 12px #fff;}
+
+/* Card */
+.card { background: rgba(255,192,203,0.85); border-radius:20px; box-shadow:0 8px 28px rgba(0,0,0,0.25); padding:20px; max-width:600px; margin:20px auto; position:relative; z-index:1; transition: transform 0.3s;}
+.card:hover { transform:scale(1.03); }
+
+/* Zaman sayacı */
+#dayCounterCard { font-size:26px; font-weight:700; margin:20px auto; max-width:300px; }
+#dayCounterCard span { font-size:38px; font-weight:900; color:#ff4d88; }
+
+/* Kum Saati */
+#hourglassContainer { width:80px; height:160px; margin:0 auto; background:linear-gradient(to top,#ff4d88 0%,#ffc0cb 100%); border-radius:8px; position:relative; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.2);}
+#hourglassFill { position:absolute; bottom:0; width:100%; height:0%; background:#5a1a2a; transition:height 1s ease; }
+
+/* 1.Yıl geri sayım */
+#countdown { font-size:26px; font-weight:700; margin:20px auto; color:#ff4d88; }
+
+/* Geleceğime Notum */
+#note { cursor:pointer; position:relative; max-width:500px; margin:30px auto; background:#fff0f5; border:2px solid #ff4d88; padding:20px; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.2); }
+#noteContent { font-size:18px; line-height:1.6; display:none; color:#5a1a2a; animation:paperWave 1s ease; }
+#noteText { font-style:italic; color:#ff4d88; }
+
+@keyframes paperWave {
+  0% {transform:rotateX(15deg) rotateY(0deg);}
+  50% {transform:rotateX(-10deg) rotateY(3deg);}
+  100% {transform:rotateX(0deg) rotateY(0deg);}
+}
+
+/* Fotoğraf galerisi */
+.section-title { margin-top:40px; font-size:28px; color:#5a1a2a; }
+.gallery { display:flex; flex-wrap:wrap; justify-content:center; margin:20px 0; z-index:1; }
+.gallery img { width:120px; height:120px; object-fit:cover; margin:8px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.3); cursor:pointer; transition: transform 0.3s; }
+.gallery img:hover { transform:scale(1.1); }
+
+/* Modal */
+#modal { display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+#modal img { max-width:90%; max-height:80%; border-radius:12px; }
+
+/* Zaman Çizelgesi */
+.timeline { position:relative; max-width:600px; margin:40px auto; }
+.timeline::after { content:''; position:absolute; width:4px; background:#ff4d88; top:0; bottom:0; left:50%; margin-left:-2px; }
+.timeline-item { padding:20px 30px; position:relative; background: rgba(255,192,203,0.85); border-radius:6px; width:50%; box-shadow:0 6px 18px rgba(0,0,0,0.2); margin:10px 0; cursor:pointer; transition: transform 0.3s; }
+.timeline-item.left { left:0; }
+.timeline-item.right { left:50%; }
+.timeline-item:hover { transform:scale(1.05); }
+.timeline-item::after { content:''; position:absolute; width:20px; height:20px; right:-10px; background:#ff4d88; border-radius:50%; top:20px; border:4px solid white; }
+.timeline-item.right::after { left:-10px; }
+
+/* Evlenen çift animasyonu */
+#couple { margin:20px auto; width:150px; height:150px; position:relative; z-index:1; }
+.couple-left, .couple-right { width:50px; height:100px; display:inline-block; border-radius:10px 10px 0 0; position:absolute; bottom:0; }
+.couple-left { left:40px; background:#ff4d88; animation:move 1s infinite alternate; }
+.couple-right { right:40px; background:#da70d6; animation:move 1s infinite alternate-reverse; }
+.couple-heart { position:absolute; width:30px; height:30px; background:red; transform:rotate(45deg); top:50px; left:60px; animation:beat 1s infinite; }
+.couple-heart::before,.couple-heart::after { content:""; position:absolute; width:30px; height:30px; background:red; border-radius:50%; }
+.couple-heart::before { top:-15px; left:0; }
+.couple-heart::after { left:15px; top:0; }
+@keyframes beat {0%,100%{ transform:scale(1) rotate(45deg);} 50%{ transform:scale(1.3) rotate(45deg);} }
+@keyframes move {0%{transform:translateY(0);} 100%{transform:translateY(-10px);}}
+
+footer { margin:40px 0 20px 0; font-size:14px; color:#5a1a2a; font-style:italic; }
+
+/* Gizli video butonu */
+#secretBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: red;
+  color: white;
+  border: none;
+  font-size: 24px;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+  z-index: 999;
+}
+#secretBtn:hover { transform: scale(1.1); }
+
+#secretVideo {
+  display: none;
+  margin: 30px auto;
+  max-width: 90%;
+  border: 4px solid #ff4d88;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+</style>
+</head>
+<body>
+
+<div id="effects"></div>
+
+<h1>Tolga & Azra</h1>
+
+<div id="couple">
+  <div class="couple-left"></div>
+  <div class="couple-right"></div>
+  <div class="couple-heart"></div>
+</div>
+
+<div id="dayCounterCard">
+Birlikte: <span id="dayCounterLarge">—</span> .gün💖
+</div>
+
+<div>
+<h3>⏳ Evlilik Saatimiz</h3>
+<div id="hourglassContainer">
+  <div id="hourglassFill"></div>
+</div>
+<p id="hourglassText"></p>
+</div>
+
+<div id="countdownCard" class="card">
+<h3>🎉 1. Yıl Dönümümüz 🎉</h3>
+<div id="countdown">— gün — saat — dakika — saniye</div>
+</div>
+
+<div class="card" id="note">
+  <h2>💌 Geleceğime Notum 💌</h2>
+  <div id="noteContent">
+    Sevgili Azram,
+
+Bu mektubu sana ve bir gün olacak çocuklarımıza bırakıyorum. Bunu yazarken hem kendimden hem de senden o kadar eminim ki, kelimeler kalbimden dökülüyor; çünkü biliyorum, sen benim için, ben de senin için yaratıldım.Çok şey yaşadık Birlikte ağladık Birlikte üzüldük Sinirlendik; ama en çok da güldük. Seninle olduğum her an, içimdeki çocuğu güldüren tek insanın sen olduğunu fark ettim.
+
+Hayatın tüm zorluklarına rağmen seninle her şey daha anlamlı, daha kolay geliyor. Yanında kendimi tam hissediyorum; senin varlığın bana huzur ve mutluluk veriyor. Sadece birlikte geçirdiğimiz anlar değil, seninle konuştuğum, seninle sessiz kaldığım her an bile bana hayatın değerini hatırlatıyor.
+
+İkimizinde hatarlı oldu Belki bu hatalar bizi birbirimizden uzaklaştırdı Günün sonunda yine yan yana olduk 
+Günün sonuyla yetinmek istemiyorum artık; ömrümün sonuna kadar seninle olmak istiyorum. Biliyorum ki en doğru olan bu, yanlışsa da yanlışı seçiyorum; çünkü Kalbimin Tek gerçeği sensin. Seni her şeyden çok seviyorum 💖 <br>
+    Gelecekte de hep yanımda olmanı diliyorum ✨
+  </div>
+  <p id="noteText">Tıkla ve mektubumu oku ✉️</p>
+</div>
+
+<h2 class="section-title">💗 İlk
+Buluşmamız </h2>
+<div class="gallery">
+<img src="foto1.jpg" alt="İlk Fotoğrafımız">
+<img src="foto2.jpg" alt="İlk Buluşma">
+</div>
+
+<h2 class="section-title">👩‍❤️‍👨 Ailemiz</h2>
+<div class="gallery">
+<img src="foto3.jpg" alt="İlk Tatil">
+<img src="foto4.jpg" alt="İlk Tatil">
+</div>
+
+<h2 class="section-title">💖 Özel Anlar</h2>
+<div class="gallery">
+<img src="foto5.jpg" alt="Özel Anlar">
+<img src="foto6.jpg" alt="Özel Anlar">
+</div>
+
+<div class="timeline">
+  <div class="timeline-item left">
+    <h4>📱 İlk Konuşma</h4>
+    <p>18 Ekim 2024</p>
+  </div>
+  <div class="timeline-item right">
+    <h4>💑 İlk Buluşmamız</h4>
+    <p>14 Kasım 2024</p>
+  </div>
+  <div class="timeline-item left">
+    <h4>🫀 İlk Öpücük</h4>
+    <p>14 Aralık 2024</p>
+  </div>
+  <div class="timeline-item right">
+    <h4>🧑‍❤️‍💋‍🧑 İlk Beraber uyuma</h4>
+    <p>14 Şubat 2025</p>
+  </div>
+</div>
+
+<div class="card">
+<iframe src="https://open.spotify.com/embed/playlist/02jDH3PvdMDJJLGLbl0iyA" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+</div>
+<div id="reasonsWhyCard" class="card" style="margin-top: 30px; background: rgba(255, 248, 240, 0.95); border: 3px solid #ff69b4; padding: 25px;">
+    <h2>🐰 Seni sevmem için ♾️ sebep❤️‍🔥</h2>
+    <p id="randomReason" style="font-size: 20px; font-weight: bold; color: #8b0000; margin: 15px 0;">
+        (Burada rastgele bir sebep görünecek...)
+    </p>
+    <button onclick="displayRandomReason()" style="background: #ff69b4; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.3s;">
+        Başka Bir Sebep Gör
+    </button>
+</div>
+
+
+<div id="modal"><img src=""><div></div></div>
+
+
+<video id="secretVideo" controls>
+  <source src="oneyear.mp4" type="video/mp4">
+  Tarayıcınız video etiketini desteklemiyor.
+</video>
+
+<button id="secretBtn">❤️</button>
+
+<footer>💖 Seni dünden daha çok yarından daha az seviyorum💖</footer>
+
+<script>
+// Zaman Sayacı
+(function(){
+  const start=new Date("2024-10-18T00:00:00");
+  const now=new Date();
+  const diff=Math.floor((now-start)/(1000*60*60*24));
+  document.getElementById('dayCounterLarge').textContent=isNaN(diff)?"—":diff;
+})();
+
+// Kum Saati
+(function(){
+  const start=new Date("2024-10-18T00:00:00");
+  const end=new Date("2028-10-18T00:00:00");
+  const now=new Date();
+  const total=end-start;
+  const elapsed=now-start;
+  const percent=Math.min(Math.max((elapsed/total)*100,0),100);
+  document.getElementById('hourglassFill').style.height=percent+"%";
+  document.getElementById('hourglassText').textContent=Math.floor(percent)+"% doldu";
+})();
+
+// YIL DÖNÜMÜ KUTLAMA VE GERİ SAYIM MODÜLÜ
+(function(){
+  // Yıl dönümü başlangıcı
+  const ANNIVERSARY_DATE = new Date("2025-10-18T00:00:00").getTime(); 
+  const countdownCard = document.getElementById("countdownCard");
+  const countdownEl = document.getElementById("countdown");
+  const effectsContainer = document.getElementById('effects');
+  const body = document.body;
+  let isAnniversary = false;
+
+  // Havai fişek oluşturucu
+  function createFirework(x, y) {
+      const colors = ['#FF4500', '#FFD700', '#ADFF2F', '#87CEEB', '#DA70D6', '#ffc0cb'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      
+      for (let i = 0; i < 50; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'firework';
+          particle.style.background = color;
+          particle.style.left = x + 'px';
+          particle.style.top = y + 'px';
+
+          // Rastgele bir patlama yönü hesapla
+          const angle = Math.random() * 2 * Math.PI;
+          const distance = Math.random() * 80 + 30;
+          const endX = Math.cos(angle) * distance;
+          const endY = Math.sin(angle) * distance;
+          
+          particle.style.setProperty('--end-x', `${endX}px`);
+          particle.style.setProperty('--end-y', `${endY}px`);
+          
+          particle.style.animationDelay = (Math.random() * 0.5) + 's';
+          
+          effectsContainer.appendChild(particle);
+
+          // Animasyon bittiğinde parçacığı kaldır
+          setTimeout(() => {
+              particle.remove();
+          }, 2000);
+      }
+  }
+
+  // Rastgele havai fişek fırlatma döngüsü
+  let fireworkInterval;
+  function startFireworks() {
+      if (fireworkInterval) clearInterval(fireworkInterval); 
+
+      fireworkInterval = setInterval(() => {
+          // Ekranın üst yarısında rastgele konum
+          const x = Math.random() * window.innerWidth;
+          const y = Math.random() * (window.innerHeight / 2);
+          createFirework(x, y);
+      }, 700);
+  }
+
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const diff = ANNIVERSARY_DATE - now;
+
+    if (diff <= 0) {
+      // Yıl Dönümü Geldi!
+      if (!isAnniversary) {
+        // Tema değişiklikleri
+        body.classList.add('anniversary-theme');
+        countdownCard.classList.add('anniversary-card-pulse'); // Parlama efekti ekle
+        startFireworks();
+        isAnniversary = true;
+      }
+      
+      // Sayacı güncelle
+      countdownCard.style.background = '#ff69b4'; // Sıcak pembe
+      countdownEl.style.color = 'white';
+      // ROMANTİK MESAJ
+      countdownEl.innerHTML = "<span style='font-size: 30px; font-weight:900;'>BUGÜN YIL DÖNÜMÜMÜZ!</span> <br> 💖 Mutluluğumuz Daim Olsun! 💖";
+      
+    } else {
+      // Geri sayım devam ediyor
+      if (isAnniversary) {
+          // Yıl dönümü teması varsa temizle
+          body.classList.remove('anniversary-theme');
+          countdownCard.classList.remove('anniversary-card-pulse');
+          clearInterval(fireworkInterval);
+          isAnniversary = false;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      countdownEl.textContent = days + " gün " + hours + " saat " + minutes + " dakika " + seconds + " saniye";
+    }
+  }
+
+  // İlk çalıştırma ve sonra her saniye güncelleme
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+})();
+
+// Geleceğime Notum mektup açma
+document.getElementById('note').onclick = function() {
+  const content = document.getElementById('noteContent');
+  const text = document.getElementById('noteText');
+  if(content.style.display === 'none') {
+    content.style.display = 'block';
+    text.style.display = 'none';
+  } else {
+    content.style.display = 'none';
+    text.style.display = 'block';
+  }
+};
+
+// Kar ve Kalpler Efekti (Yıl dönümünde sadece ve hızlı kalp düşüşü için modifiye edildi)
+const effects=document.getElementById('effects');
+function createEffect(){
+  const el=document.createElement('div');
+  const isAnniversaryMode = document.body.classList.contains('anniversary-theme');
+  
+  // Yıl dönümündeyse sadece kalp, değilse kar veya kalp
+  if (isAnniversaryMode) {
+      el.className='heart';
+  } else {
+      el.className=Math.random()<0.7?'snowflake':'heart';
+  }
+
+  el.style.left=Math.random()*window.innerWidth+'px';
+  el.style.top='-10px';
+  el.style.width=(Math.random()*6+4)+'px';
+  el.style.height=(Math.random()*6+4)+'px';
+  el.style.animationDuration=(5+Math.random()*5)+'s';
+  effects.appendChild(el);
+  setTimeout(()=>{ effects.removeChild(el); },12000);
+}
+
+// Yıl dönümündeyse daha hızlı (50ms), değilse normal hızda (150ms) çalıştır
+setInterval(() => {
+    createEffect();
+}, 50);
+
+// Modal galerisi
+const modal=document.getElementById('modal');
+const modalImg=modal.querySelector('img');
+document.querySelectorAll('.gallery img').forEach(img=>{
+  img.onclick=()=>{modal.style.display='flex'; modalImg.src=img.src;}
+});
+modal.onclick=()=>{ modal.style.display='none'; };
+
+// === Gizli video parolası ===
+document.getElementById("secretBtn").onclick = function() {
+  let pwd = prompt("💖 Videoyu görmek için Şifreyi bul 🕵️ ");
+  if(pwd === "mantıchapo") {
+    document.getElementById("secretVideo").style.display = "block";
+    document.getElementById("secretVideo").scrollIntoView({behavior:"smooth"});
+  } else {
+    alert("🤠 Yanlış Gülümm!!");
+  }
+};
+
+</script>
+<script>
+// Zaman göre arka plan ve gece yıldızları
+(function(){
+  const body = document.body;
+  
+  // Yıldızlar
+  const starsContainer = document.createElement('div');
+  starsContainer.style.position = 'fixed';
+  starsContainer.style.top = '0';
+  starsContainer.style.left = '0';
+  starsContainer.style.width = '100%';
+  starsContainer.style.height = '100%';
+  starsContainer.style.pointerEvents = 'none';
+  starsContainer.style.zIndex = '0';
+  body.appendChild(starsContainer);
+
+  function createStars(){
+    starsContainer.innerHTML = '';
+    for(let i=0;i<100;i++){
+      const star = document.createElement('div');
+      star.style.position = 'absolute';
+      star.style.width = Math.random()*2+1+'px';
+      star.style.height = Math.random()*2+1+'px';
+      star.style.background='white';
+      star.style.borderRadius='50%';
+      star.style.top = Math.random()*100+'%';
+      star.style.left = Math.random()*100+'%';
+      star.style.opacity = Math.random();
+      star.style.animation = `twinkle ${2+Math.random()*3}s infinite alternate`;
+      starsContainer.appendChild(star);
+    }
+  }
+
+  // Yıldız animasyonu keyframes
+  const style = document.createElement('style');
+  style.innerHTML = `
+    @keyframes twinkle {
+      0% { opacity:0.1; }
+      50% { opacity:1; }
+      100% { opacity:0.1; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  function updateBackground(){
+    const hour = new Date().getHours();
+    starsContainer.style.display = 'none'; // default kapalı
+
+    // Yıl dönümü teması devredeyse gece/gündüz arka planını atla
+    if (body.classList.contains('anniversary-theme')) {
+        starsContainer.style.display = 'none';
+        return;
+    }
+
+    if(hour >= 6 && hour < 12){
+      body.style.background = "linear-gradient(#a0c4ff, #f0f8ff)"; // sabah
+    } else if(hour >= 12 && hour < 18){
+      body.style.background = "linear-gradient(#fff4a3, #ffd27f)"; // öğlen
+    } else if(hour >= 18 && hour < 21){
+      body.style.background = "linear-gradient(#ffb347, #ff7e5f)"; // akşam
+    } else {
+      body.style.background = "linear-gradient(#0f2027, #2c5364)"; // gece
+      starsContainer.style.display = 'block';
+      createStars();
+    }
+    body.style.transition = 'background 2s';
+  }
+
+  updateBackground();
+  setInterval(updateBackground, 60000); // her dakika kontrol
+})();
+
+// --- 100 SEBEP (SENİ NEDEN SEVİYORUM) MODÜLÜ ---
+const loveReasons = [
+    // Senin ve Azra'nın ilişkisine özel, içten ve doğal 100 Sebep:
+    "Gözlerin sabah uyandığımda gördüğüm en güzel manzara olduğu için.",
+    "Bana her baktığında, kalbimin ilk günkü gibi çarpması.",
+    "En kötü günümde bile beni güldürmeyi başardığın o anlar.",
+    "Birlikte sessizce oturduğumuzda bile her şeyi anladığımızı bilmek.",
+    "yan yanayken en mutlu insan olmam.",
+    "Bana yeni müzikler, filmler ve fikirler keşfettiğin için.",
+    "Hayallerime benden daha çok inanan tek kişi olman.",
+    "Yanında dünyanın en rahat ve en güvende hissettiğim yer olması.",
+    "O küçük, kimsenin bilmediği, sadece bize özel esprilerimiz.",
+    "Birbirimizin cümlelerini tamamladığımız o anlar.",
+    "Sinirlendiğinde bile o kadar tatlı olman Şaka!.",
+    "İlk buluşmamızda o kadar gergin olmamıza rağmen vazgeçmeyişimiz.",
+    "Bana 'aşkım' dediğinde sesinin tonu.",
+    "Bana bazen küçük bir not, bazen de kocaman bir sürpriz yapman.",
+    "Her zaman ne kadar düşünceli ve zarif olman.",
+    "Ellerimin, sadece senin eline göre yaratılmış gibi hissettirmesi.",
+    "Umutsuzluğa düştüğümde, elimi tutup beni yukarı çekmen.",
+    "Muğla'da izlediğimiz o unutulmaz gün batımı.",
+    "Gülüşünün tüm odayı aydınlatması.",
+    "Yanında kendim olmaktan asla çekinmemem.",
+    "Küçük şeylerden bile büyük mutluluklar yaratma yeteneğin.",
+    "Tartışsak bile, sonunda hep 'biz'de buluşmamız.",
+    "Bana her zaman dürüst ve açık olman.",
+    "Kötü bir gün geçirdiğinde, hemen fark edip yanımda olman.",
+    "Hayatımdaki en büyük macera ortağım olman.",
+    "Omuzunda uyumak, dünyanın en huzurlu yeri.",
+    "Yanında geçen zamanın hızla akıp gitmesi.",
+    "Bana pestolu makarna yapman.",
+    "En sevdiğim yemeğin senin yaptıkların olması.",
+    "Beraber yaptığımız o saçma sapan işler.",
+    "Bazen sadece göz göze gelip gülmemiz.",
+    "Bana her zaman nazik ve sabırlı olman.",
+    "Senden öğrendiğim her şey.",
+    "Birlikte yaşlanma fikri beni heyecanlandırdığı için.",
+    "O küçücük ayrıntıları bile hatırlayan güçlü hafızan balik olanı.",
+    "Her 'seni seviyorum' deyişinin farklı ve içten olması.",
+    "Bana kendimi 'yeterli' hissettirmen.",
+    "Gelecek planlarımızda daima 'biz'in olması.",
+    "İsmail Yk dinlemen.",
+    "Uyanır uyanmaz tiktok izlemen saygısız.",
+    "Beni kimsenin yargılamadığı bir liman gibi görmen.",
+    "Yanında çocuklaşabilme özgürlüğüm.",
+    "Benim hatalarımla bile beni kucaklaman.",
+    "Her mevsimi seninle daha çok sevmem.",
+    "Bana verdiğin huzur .",
+    "Mutfakta yaptığımız o komik felaketler.",
+    "Beraber film izlerken göğsüme yatman.",
+    "Sana her baktığımda içimin erimesi.",
+    "Ruh eşim olman.",
+    "FİKFİK.",
+    "Giyinirken sana danışmayı sevmem.",
+    "Seninle kurduğumuz o mükemmel denge.",
+    "Ne kadar yorgun olursan ol, bana vakit ayırman.",
+    "Bana hissettirdiğin o eşsiz heyecan.",
+    "Seninle edilen bir telefon konuşmasının bile tüm günümü güzelleştirmesi.",
+    "Bana her zaman ilham vermen.",
+    "Sensiz geçen bir günün ne kadar boş olduğunu fark etmek.",
+    "Aptalca şakalarıma bile samimiyetle gülmen.",
+    "Bana Anlamlı hediyeler yapman.",
+    "İzmir'de, yağmurda ıslanırken bile ne kadar mutlu olduğumuz.",
+    "Bana her zaman kendime inanmamı söylemen.",
+    "Seninle dertleşmenin her şeye iyi gelmesi.",
+    "Uyurken bile ne kadar masum ve güzel olman.",
+    "Yatağıma beraber sığabilmemiz.",
+    "Seninle kurduğum aile hayali.",
+    "En karanlık gecede bile benim ışığım olman.",
+    "Şakalarıma dayanbilemen.",
+    "Bana her an ne kadar değerli olduğumu hissettirmen.",
+    "aynı beden giymemiz.",
+    "Makyajsız da ne kadar doğal ve güzel olman.",
+    "Kışın en soğuk gününde bile beni sıcacık tutman.",
+    "Bana hissettiğim her şeyi açıkça söyleyebilmen.",
+    "Benim için yaptığın her küçük fedakarlık.",
+    "Hayatıma girdiğin için.",
+    "Konuşabiliyorsun.",
+    "O küçük, utangaç gülümsemen Kalmadı o.",
+    "Benim en iyi arkadaşım olman.",
+    "Bana verdiğin o sonsuz huzur.",
+    "Beraber uyuyakaldığımız tembel pazarlar.",
+    "İlklerim olman.",
+    "Beni, benim bile bilmediğim yönlerimle tanıman.",
+    "Gelecek için kurduğumuz tüm umutlar.",
+    "Her şeyi seninle paylaşma isteğim.",
+    "Yaptığım hataları olgunlukla karşılaman.",
+    "Bana hayatın ne kadar güzel olduğunu hatırlatman.",
+    "Benimle kantır oynaman.",
+    "Beni olduğum gibi kabul etmen.",
+    "Tavşan dişlerin var.",
+    "dünki gibi bugünde güzel olman.",
+    "Seninle yürüdüğümüz her yolun, en güzel yol olması.",
+    "Beni sevdiğini her an hissettirmen.",
+    "Hayatıma kattığın anlam ve derinlik.",
+    "Her ne olursa olsun, yanımda olacağını bilmem.",
+    "Seninle geçen tüm geçmiş, ve gelecek tüm zamanlar için.",
+    "Senden uzaktayken bile seni kalbimde hissetmem.",
+    "Birlikte yemek yaparken çıkardığımız o karmaşa.",
+    "Seninle hayata başka bir gözle bakmayı öğrenmem.",
+    "Her zaman aklımdaki ilk kişi olman.",
+    "Seninle beraber büyümeyi çok sevmem."
+];
+
+function displayRandomReason() {
+    // Rastgele bir indeks seçer
+    const randomIndex = Math.floor(Math.random() * loveReasons.length);
+    const randomReason = loveReasons[randomIndex];
+    
+    // HTML içindeki elementi bulur ve metni günceller
+    const reasonElement = document.getElementById('randomReason');
+    reasonElement.textContent = randomReason;
+}
+
+// Sayfa yüklendiğinde bir sebep göster
+window.onload = function() {
+    // Mevcut tüm onload fonksiyonlarını korumak için kontrol etmeniz gerekebilir.
+    // Eğer başka bir onload fonksiyonu varsa, onun içine çağırın:
+    displayRandomReason(); 
+};
+
+</script>
+
+</body>
+</html>
+
+
