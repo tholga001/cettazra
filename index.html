@@ -115,6 +115,54 @@ footer { margin:40px 0 20px 0; font-size:14px; color:#5a1a2a; font-style:italic;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
+/* YENİ: Fotoğraf Yükleme Butonu */
+#uploadBtn {
+  position: fixed;
+  bottom: 90px; /* Secret butondan yukarıda olacak */
+  right: 20px;
+  background: #5a1a2a; /* Kahverengi-mor */
+  color: white;
+  border: none;
+  font-size: 24px;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+  z-index: 999;
+}
+#uploadBtn:hover { transform: scale(1.1); background: #7c2a3e; }
+
+/* YENİ: Dosya Seçme Alanını Gizle */
+#photoInput { display: none; }
+
+/* YENİ: Yeni Yüklenen Fotoğraflar Galerisi */
+#uploadedGallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 20px 0;
+  z-index: 1;
+}
+#uploadedGallery img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+#uploadedGallery img:hover { transform:scale(1.1); }
+</style>
+<style data-twinkle>
+  @keyframes twinkle {
+    0% { opacity:0.1; }
+    50% { opacity:1; }
+    100% { opacity:0.1; }
+  }
 </style>
 </head>
 <body>
@@ -123,19 +171,16 @@ footer { margin:40px 0 20px 0; font-size:14px; color:#5a1a2a; font-style:italic;
 
 <h1>Tolga & Azra</h1>
 
-<!-- Evlenen çift -->
 <div id="couple">
   <div class="couple-left"></div>
   <div class="couple-right"></div>
   <div class="couple-heart"></div>
 </div>
 
-<!-- Zaman Sayacı -->
 <div id="dayCounterCard">
 Birlikte: <span id="dayCounterLarge">—</span> .gün💖
 </div>
 
-<!-- Kum Saati -->
 <div>
 <h3>⏳ Evlilik Saatimiz</h3>
 <div id="hourglassContainer">
@@ -144,13 +189,11 @@ Birlikte: <span id="dayCounterLarge">—</span> .gün💖
 <p id="hourglassText"></p>
 </div>
 
-<!-- 1.Yıl geri sayım -->
 <div id="countdownCard" class="card">
 <h3>🎉 1. Yıl Dönümümüz 🎉</h3>
 <div id="countdown">— gün — saat — dakika — saniye</div>
 </div>
 
-<!-- Geleceğime Notum Mektup -->
 <div class="card" id="note">
   <h2>💌 Geleceğime Notum 💌</h2>
   <div id="noteContent">
@@ -167,9 +210,7 @@ Günün sonuyla yetinmek istemiyorum artık; ömrümün sonuna kadar seninle olm
   <p id="noteText">Tıkla ve mektubumu oku ✉️</p>
 </div>
 
-<!-- Fotoğraf galerisi -->
-<h2 class="section-title">💗 İlk
-Buluşmamız </h2>
+<h2 class="section-title">💗 İlk Buluşmamız </h2>
 <div class="gallery">
 <img src="foto1.jpg" alt="İlk Fotoğrafımız">
 <img src="foto2.jpg" alt="İlk Buluşma">
@@ -187,7 +228,10 @@ Buluşmamız </h2>
 <img src="foto6.jpg" alt="Özel Anlar">
 </div>
 
-<!-- Zaman Çizelgesi -->
+<h2 class="section-title">📷 Yüklediğim Anılar</h2>
+<div id="uploadedGallery">
+  </div>
+
 <div class="timeline">
   <div class="timeline-item left">
     <h4>📱 İlk Konuşma</h4>
@@ -207,23 +251,22 @@ Buluşmamız </h2>
   </div>
 </div>
 
-<!-- Spotify -->
 <div class="card">
 <iframe src="https://open.spotify.com/embed/playlist/02jDH3PvdMDJJLGLbl0iyA" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 </div>
 
-<!-- Modal -->
 <div id="modal"><img src=""><div></div></div>
 
 
-<!-- Gizli video -->
 <video id="secretVideo" controls>
   <source src="oneyear.mp4" type="video/mp4">
   Tarayıcınız video etiketini desteklemiyor.
 </video>
 
-<!-- Kalp butonu -->
 <button id="secretBtn">❤️</button>
+
+<input type="file" id="photoInput" accept="image/*" multiple>
+<button id="uploadBtn" title="Fotoğraf Yükle">📷</button>
 
 <footer>💖 Seni dünden daha çok yarından daha az seviyorum💖</footer>
 
@@ -270,7 +313,7 @@ Buluşmamız </h2>
 document.getElementById('note').onclick = function() {
   const content = document.getElementById('noteContent');
   const text = document.getElementById('noteText');
-  if(content.style.display === 'none') {
+  if(content.style.display === 'none' || content.style.display === '') {
     content.style.display = 'block';
     text.style.display = 'none';
   } else {
@@ -294,7 +337,7 @@ function createEffect(){
 }
 setInterval(createEffect,150);
 
-// Modal galerisi
+// Modal galerisi (Mevcut fotoğraflar için)
 const modal=document.getElementById('modal');
 const modalImg=modal.querySelector('img');
 document.querySelectorAll('.gallery img').forEach(img=>{
@@ -302,7 +345,7 @@ document.querySelectorAll('.gallery img').forEach(img=>{
 });
 modal.onclick=()=>{ modal.style.display='none'; };
 
-// === Gizli video parolası ===
+// Gizli video parolası
 document.getElementById("secretBtn").onclick = function() {
   let pwd = prompt("💖 Videoyu görmek için Şifreyi bul 🕵️ ");
   if(pwd === "041326") {
@@ -313,54 +356,26 @@ document.getElementById("secretBtn").onclick = function() {
   }
 };
 
-</script>
-<script>
-// Zaman göre arka plan ve gece yıldızları
+// Zaman ve Gece Yıldızları Efekti
 (function(){
   const body = document.body;
-  
-  // Yıldızlar
   const starsContainer = document.createElement('div');
-  starsContainer.style.position = 'fixed';
-  starsContainer.style.top = '0';
-  starsContainer.style.left = '0';
-  starsContainer.style.width = '100%';
-  starsContainer.style.height = '100%';
-  starsContainer.style.pointerEvents = 'none';
-  starsContainer.style.zIndex = '0';
+  starsContainer.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;';
   body.appendChild(starsContainer);
 
   function createStars(){
     starsContainer.innerHTML = '';
+    if (window.innerWidth < 600) return; // Mobil cihazlarda performansı koru
     for(let i=0;i<100;i++){
       const star = document.createElement('div');
-      star.style.position = 'absolute';
-      star.style.width = Math.random()*2+1+'px';
-      star.style.height = Math.random()*2+1+'px';
-      star.style.background='white';
-      star.style.borderRadius='50%';
-      star.style.top = Math.random()*100+'%';
-      star.style.left = Math.random()*100+'%';
-      star.style.opacity = Math.random();
-      star.style.animation = `twinkle ${2+Math.random()*3}s infinite alternate`;
+      star.style.cssText = `position:absolute; width:${Math.random()*2+1}px; height:${Math.random()*2+1}px; background:white; border-radius:50%; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:${Math.random()}; animation:twinkle ${2+Math.random()*3}s infinite alternate;`;
       starsContainer.appendChild(star);
     }
   }
 
-  // Yıldız animasyonu keyframes
-  const style = document.createElement('style');
-  style.innerHTML = `
-    @keyframes twinkle {
-      0% { opacity:0.1; }
-      50% { opacity:1; }
-      100% { opacity:0.1; }
-    }
-  `;
-  document.head.appendChild(style);
-
   function updateBackground(){
     const hour = new Date().getHours();
-    starsContainer.style.display = 'none'; // default kapalı
+    starsContainer.style.display = 'none';
 
     if(hour >= 6 && hour < 12){
       body.style.background = "linear-gradient(#a0c4ff, #f0f8ff)"; // sabah
@@ -373,71 +388,157 @@ document.getElementById("secretBtn").onclick = function() {
       starsContainer.style.display = 'block';
       createStars();
     }
-    body.style.transition = 'background 2s';
   }
 
   updateBackground();
-  setInterval(updateBackground, 60000); // her dakika kontrol
+  setInterval(updateBackground, 60000); 
 })();
 </script>
-<script>
-// Gece yıldızları efekti
-(function(){
-  const effects = document.getElementById('effects');
 
-  function createStars(){
-    // Önce eski yıldızları temizle
-    document.querySelectorAll('.star').forEach(s=>s.remove());
+<script type="module">
+  // Firebase SDK'larından gerekli fonksiyonları import etme
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    for(let i=0;i<100;i++){
-      const star = document.createElement('div');
-      star.className='star';
-      star.style.position='absolute';
-      star.style.width=(Math.random()*2+2)+'px';  // biraz daha büyük
-      star.style.height=(Math.random()*2+2)+'px';
-      star.style.background='white';
-      star.style.borderRadius='50%';
-      star.style.top=Math.random()*100+'%';
-      star.style.left=Math.random()*100+'%';
-      star.style.opacity=0.8;
-      star.style.pointerEvents='none';
-      star.style.animation=`twinkle ${2+Math.random()*3}s infinite alternate`;
-      effects.appendChild(star);
-    }
+  // Sizin sağladığınız Firebase Konfigürasyonu
+  const firebaseConfig = {
+    apiKey: "AIzaSyDKJddt7_PzS8eonGG26TMH_vgvSZslXwI",
+    authDomain: "cet001-fa41d.firebaseapp.com",
+    databaseURL: "https://cet001-fa41d-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "cet001-fa41d",
+    storageBucket: "cet001-fa41d.firebasestorage.app",
+    messagingSenderId: "315156202999",
+    appId: "1:315156202999:web:e35d7ca2894eb1d8ae1af2"
+  };
+
+  // Firebase'i başlatma ve servisleri alma
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  // === Uygulama Değişkenleri ===
+  const photoInput = document.getElementById('photoInput');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const uploadedGallery = document.getElementById('uploadedGallery');
+  const modal = document.getElementById('modal');
+  
+  // Modal'ın img elementini güvenli bir şekilde al
+  let modalImg = null;
+  if(modal) {
+      modalImg = modal.querySelector('img');
   }
 
-  // Yıldız animasyonu keyframes
-  const style = document.createElement('style');
-  style.innerHTML = `
-    @keyframes twinkle {
-      0% { opacity:0.3; }
-      50% { opacity:1; }
-      100% { opacity:0.3; }
-    }
-  `;
-  document.head.appendChild(style);
+  let photos = []; // Firebase'den gelen fotoğraf URL'leri
+  let currentPhotoIndex = 0;
+  const ONE_HOUR = 3600000; // 1 saat
+  let rotationInterval = null;
 
-  function updateBackground(){
-    const hour = new Date().getHours();
-    const body = document.body;
+  // --- Galeri Yükleme ve Döngü Fonksiyonları ---
 
-    if(hour >= 6 && hour < 12){
-      body.style.background = "linear-gradient(#a0c4ff, #f0f8ff)";
-    } else if(hour >= 12 && hour < 18){
-      body.style.background = "linear-gradient(#fff4a3, #ffd27f)";
-    } else if(hour >= 18 && hour < 21){
-      body.style.background = "linear-gradient(#ffb347, #ff7e5f)";
-    } else {
-      body.style.background = "linear-gradient(#0f2027, #2c5364)";
-      createStars();
-    }
-    body.style.transition='background 2s';
+  function renderGallery() {
+      uploadedGallery.innerHTML = '';
+      
+      if (photos.length > 0) {
+          const indexToShow = (photos.length > 1) ? currentPhotoIndex : 0;
+          
+          const img = document.createElement('img');
+          img.src = photos[indexToShow].url;
+          img.alt = `Yüklenen Fotoğraf ${indexToShow + 1}`;
+          
+          img.onclick = () => {
+              if (modal && modalImg) {
+                  modal.style.display = 'flex';
+                  modalImg.src = img.src;
+              }
+          };
+          
+          uploadedGallery.appendChild(img);
+      } else {
+          uploadedGallery.innerHTML = '<p style="color:#5a1a2a; margin-top:10px;">Henüz fotoğraf yüklenmedi.</p>';
+      }
   }
 
-  updateBackground();
-  setInterval(updateBackground,60000);
-})();
+  function rotatePhoto() {
+      if (photos.length > 1) {
+          currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+          renderGallery();
+      }
+  }
 
+  function loadPhotosFromFirebase() {
+      // 'azra_tolga_photos' koleksiyonunu zaman damgasına göre (en yenisi en başta) sorgula
+      const q = query(collection(db, "azra_tolga_photos"), orderBy("timestamp", "desc"));
+
+      // Anlık dinleme (onSnapshot)
+      onSnapshot(q, (snapshot) => {
+          photos = [];
+          snapshot.forEach((doc) => {
+              photos.push(doc.data());
+          });
+
+          renderGallery();
+
+          // Döngüyü başlat/güncelle
+          if (photos.length > 1) {
+              if (!rotationInterval) {
+                  rotationInterval = setInterval(rotatePhoto, ONE_HOUR);
+              }
+          } else {
+              // Tek fotoğraf varsa veya hiç yoksa döngüyü durdur
+              if (rotationInterval) {
+                  clearInterval(rotationInterval);
+                  rotationInterval = null;
+              }
+          }
+      }, (error) => {
+         // Firestore dinleme hatası (genellikle kural hatası)
+         console.error("Firestore Dinleme Hatası: Güvenlik kurallarını kontrol edin.", error);
+      });
+  }
+
+  // --- Yükleme İşlemi ---
+
+  if (uploadBtn) {
+      uploadBtn.onclick = () => {
+          if (photoInput) photoInput.click();
+      };
+  }
+
+  if (photoInput) {
+      photoInput.onchange = async (event) => {
+          const file = event.target.files[0];
+          if (!file) return;
+          
+          alert("Fotoğraf yükleniyor, lütfen bekleyiniz..."); // Basit bir uyarı mesajı
+          
+          try {
+              // 1. Storage'a yükle (Dosya adını benzersiz yapmak için zaman damgası kullan)
+              const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
+              await uploadBytes(storageRef, file);
+
+              // 2. Yüklenen fotoğrafın URL'ini al
+              const url = await getDownloadURL(storageRef);
+
+              // 3. Firestore'a URL ve zaman damgasını kaydet
+              await addDoc(collection(db, "azra_tolga_photos"), {
+                  url: url,
+                  timestamp: serverTimestamp()
+              });
+              
+              alert("Fotoğraf başarıyla yüklendi! 🎉");
+
+          } catch (error) {
+              console.error("Yükleme veya kaydetme hatası: ", error);
+              alert("Fotoğraf yüklenirken bir hata oluştu. Lütfen Firebase Storage ve Firestore güvenlik kurallarınızı kontrol edin.");
+          }
+
+          photoInput.value = ''; // Input'u temizle
+      };
+  }
+  
+  // Sayfa yüklendiğinde Firebase'den fotoğrafları çekmeye başla
+  loadPhotosFromFirebase();
 </script>
 
 </body>
