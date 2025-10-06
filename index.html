@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tolga & Azra</title>
+<style>
+/* ... (Mevcut CSS kodunuzun tamamı) ... */
+body {
+  margin:0; padding:0;
+  font-family:'Arial',sans-serif;
+  color:#5a1a2a;
+  text-align:center;
+  overflow-x:hidden;
+  position:relative;
+  background: linear-gradient(#a0c4ff, #f0f8ff);
+  transition: background 2s;
+}
+
+/* YENİ: Havai Fişek Canvas (Siteyi engellemez) */
+#fireworksCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5; 
+    pointer-events: none; /* Siteyi engellemeyen kritik özellik */
+    display: none; 
+}
+
+/* Efektler: Kar ve kalpler */
+#effects { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden; }
+.snowflake, .heart, .ring, .diamond { position:absolute; border-radius:50%; opacity:0.8; }
+
+.snowflake { width:6px; height:6px; background:white; animation:fall linear infinite; }
+
+/* YIL DÖNÜMÜ EFEKTLERİ */
+.heart { width:16px; height:16px; background:red; clip-path: polygon(50% 0%, 61% 13%, 75% 25%, 50% 100%, 25% 25%, 39% 13%); animation:fall linear infinite; }
+.ring { 
+    width: 20px; height: 20px; 
+    background: gold; 
+    box-shadow: 0 0 10px #fff;
+    border-radius: 50%; 
+    animation: fall linear infinite, pulse 1s infinite alternate; 
+    border: 2px solid white; 
+}
+.diamond { 
+    width: 14px; height: 14px; 
+    background: #00ffff; /* Aqua renk */
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); /* Basit elmas şekli */
+    animation: fall linear infinite;
+    opacity: 0.9;
+}
+
+/* Yıl Dönümü Efektleri için DÖNME hızı arttırıldı */
+@keyframes fall {
+  0%{transform:translateY(-10px) rotate(0deg);} 
+  100%{transform:translateY(110vh) rotate(720deg); opacity:0;} /* 2 tam tur dönme */
+}
+@keyframes pulse { 0% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+
+/* Başlık */
+h1 {margin:20px 0; font-size:48px; text-shadow:2px 2px 12px #fff;}
+
+/* Card */
+.card { background: rgba(255,192,203,0.85); border-radius:20px; box-shadow:0 8px 28px rgba(0,0,0,0.25); padding:20px; max-width:600px; margin:20px auto; position:relative; z-index:1; transition: transform 0.3s;}
+.card:hover { transform:scale(1.03); }
+
+/* Zaman sayacı */
+#dayCounterCard { font-size:26px; font-weight:700; margin:20px auto; max-width:300px; }
+#dayCounterCard span { font-size:38px; font-weight:900; color:#ff4d88; }
+
+/* Kum Saati */
+#hourglassContainer { width:80px; height:160px; margin:0 auto; background:linear-gradient(to top,#ff4d88 0%,#ffc0cb 100%); border-radius:8px; position:relative; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.2);}
+#hourglassFill { position:absolute; bottom:0; width:100%; height:0%; background:#5a1a2a; transition:height 1s ease; }
+
+/* 1.Yıl geri sayım */
+#countdown { font-size:26px; font-weight:700; margin:20px auto; color:#ff4d88; }
+
+/* Geleceğime Notum */
+#note { cursor:pointer; position:relative; max-width:500px; margin:30px auto; background:#fff0f5; border:2px solid #ff4d88; padding:20px; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.2); }
+#noteContent { font-size:18px; line-height:1.6; display:none; color:#5a1a2a; animation:paperWave 1s ease; }
+#noteText { font-style:italic; color:#ff4d88; }
+
+@keyframes paperWave {
+  0% {transform:rotateX(15deg) rotateY(0deg);}
+  50% {transform:rotateX(-10deg) rotateY(3deg);}
+  100% {transform:rotateX(0deg) rotateY(0deg);}
+}
+
+/* Fotoğraf galerisi */
+.section-title { margin-top:40px; font-size:28px; color:#5a1a2a; }
+.gallery { display:flex; flex-wrap:wrap; justify-content:center; margin:20px 0; z-index:1; }
+.gallery img { width:120px; height:120px; object-fit:cover; margin:8px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.3); cursor:pointer; transition: transform 0.3s; }
+.gallery img:hover { transform:scale(1.1); }
+
+/* Modal */
+#modal { display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+#modal img { max-width:90%; max-height:80%; border-radius:12px; }
+
+/* Zaman Çizelgesi */
+.timeline { position:relative; max-width:600px; margin:40px auto; }
+.timeline::after { content:''; position:absolute; width:4px; background:#ff4d88; top:0; bottom:0; left:50%; margin-left:-2px; }
+.timeline-item { padding:20px 30px; position:relative; background: rgba(255,192,203,0.85); border-radius:6px; width:50%; box-shadow:0 6px 18px rgba(0,0,0,0.2); margin:10px 0; cursor:pointer; transition: transform 0.3s; }
+.timeline-item.left { left:0; }
+.timeline-item.right { left:50%; }
+.timeline-item:hover { transform:scale(1.05); }
+.timeline-item::after { content:''; position:absolute; width:20px; height:20px; right:-10px; background:#ff4d88; border-radius:50%; top:20px; border:4px solid white; }
+.timeline-item.right::after { left:-10px; }
+
+/* Evlenen çift animasyonu */
+#couple { margin:20px auto; width:150px; height:150px; position:relative; z-index:1; }
+.couple-left, .couple-right { width:50px; height:100px; display:inline-block; border-radius:10px 10px 0 0; position:absolute; bottom:0; }
+.couple-left { left:40px; background:#ff4d88; animation:move 1s infinite alternate; }
+.couple-right { right:40px; background:#da70d6; animation:move 1s infinite alternate-reverse; }
+.couple-heart { position:absolute; width:30px; height:30px; background:red; transform:rotate(45deg); top:50px; left:60px; animation:beat 1s infinite; }
+.couple-heart::before,.couple-heart::after { content:""; position:absolute; width:30px; height:30px; background:red; border-radius:50%; }
+.couple-heart::before { top:-15px; left:0; }
+.couple-heart::after { left:15px; top:0; }
+@keyframes beat {0%,100%{ transform:scale(1) rotate(45deg);} 50%{ transform:scale(1.3) rotate(45deg);} }
+@keyframes move {0%{transform:translateY(0);} 100%{transform:translateY(-10px);}}
+
+footer { margin:40px 0 20px 0; font-size:14px; color:#5a1a2a; font-style:italic; }
+
+/* Gizli video butonu */
+#secretBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: red;
+  color: white;
+  border: none;
+  font-size: 24px;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+  z-index: 999;
+}
+#secretBtn:hover { transform: scale(1.1); }
+
+#secretVideo {
+  display: none;
+  margin: 30px auto;
+  max-width: 90%;
+  border: 4px solid #ff4d88;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+/* Fotoğraf Yükleme Butonu */
+#uploadBtn {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  background: #5a1a2a;
+  color: white;
+  border: none;
+  font-size: 24px;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+  z-index: 999;
+}
+#uploadBtn:hover { transform: scale(1.1); background: #7c2a3e; }
+
+/* Dosya Seçme Alanını Gizle */
+#photoInput { display: none; }
+
+/* Yeni Yüklenen Fotoğraflar Galerisi */
+#uploadedGallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 20px 0;
+  z-index: 1;
+}
+#uploadedGallery img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+#uploadedGallery img:hover { transform:scale(1.1); }
+</style>
+<style data-twinkle>
+  @keyframes twinkle {
+    0% { opacity:0.1; }
+    50% { opacity:1; }
+    100% { opacity:0.1; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="fireworksCanvas"></canvas>
+<div id="effects"></div>
+
+<h1>Tolga & Azra</h1>
+
+<div id="couple">
+  <div class="couple-left"></div>
+  <div class="couple-right"></div>
+  <div class="couple-heart"></div>
+</div>
+
+<div id="dayCounterCard">
+Birlikte: <span id="dayCounterLarge">—</span> .gün💖
+</div>
+
+<div>
+<h3>⏳ Evlilik Saatimiz</h3>
+<div id="hourglassContainer">
+  <div id="hourglassFill"></div>
+</div>
+<p id="hourglassText"></p>
+</div>
+
+<div id="countdownCard" class="card">
+<h3>🎉 1. Yıl Dönümümüz 🎉</h3>
+<div id="countdown">— gün — saat — dakika — saniye</div>
+</div>
+
+<div class="card" id="note">
+  <h2>💌 Geleceğime Notum 💌</h2>
+  <div id="noteContent">
+    Sevgili Azram,
+
+Bu mektubu sana ve bir gün olacak çocuklarımıza bırakıyorum. Bunu yazarken hem kendimden hem de senden o kadar eminim ki, kelimeler kalbimden dökülüyor; çünkü biliyorum, sen benim için, ben de senin için yaratıldım.Çok şey yaşadık Birlikte ağladık Birlikte üzüldük Sinirlendik; ama en çok da güldük. Seninle olduğum her an, içimdeki çocuğu güldüren tek insanın sen olduğunu fark ettim.
+
+Hayatın tüm zorluklarına rağmen seninle her şey daha anlamlı, daha kolay geliyor. Yanında kendimi tam hissediyorum; senin varlığın bana huzur ve mutluluk veriyor. Sadece birlikte geçirdiğimiz anlar değil, seninle konuştuğum, seninle sessiz kaldığım her an bile bana hayatın değerini hatırlatıyor.
+
+İkimizinde hatarlı oldu Belki bu hatalar bizi birbirimizden uzaklaştırdı Günün sonunda yine yan yana olduk 
+Günün sonuyla yetinmek istemiyorum artık; ömrümün sonuna kadar seninle olmak istiyorum. Biliyorum ki en doğru olan bu, yanlışsa da yanlışı seçiyorum; çünkü Kalbimin Tek gerçeği sensin. Seni her şeyden çok seviyorum 💖 <br>
+    Gelecekte de hep yanımda olmanı diliyorum ✨
+  </div>
+  <p id="noteText">Tıkla ve mektubumu oku ✉️</p>
+</div>
+
+<h2 class="section-title">💗 İlk Buluşmamız </h2>
+<div class="gallery">
+<img src="foto1.jpg" alt="İlk Fotoğrafımız">
+<img src="foto2.jpg" alt="İlk Buluşma">
+</div>
+
+<h2 class="section-title">👩‍❤️‍👨 Ailemiz</h2>
+<div class="gallery">
+<img src="foto3.jpg" alt="İlk Tatil">
+<img src="foto4.jpg" alt="İlk Tatil">
+</div>
+
+<h2 class="section-title">💖 Özel Anlar</h2>
+<div class="gallery">
+<img src="foto5.jpg" alt="Özel Anlar">
+<img src="foto6.jpg" alt="Özel Anlar">
+</div>
+
+<h2 class="section-title">📷 Yüklediğim Anılar</h2>
+<div id="uploadedGallery">
+  </div>
+
+<div class="timeline">
+  <div class="timeline-item left">
+    <h4>📱 İlk Konuşma</h4>
+    <p>18 Ekim 2024</p>
+  </div>
+  <div class="timeline-item right">
+    <h4>💑 İlk Buluşmamız</h4>
+    <p>14 Kasım 2024</p>
+  </div>
+  <div class="timeline-item left">
+    <h4>🫀 İlk Öpücük</h4>
+    <p>14 Aralık 2024</p>
+  </div>
+  <div class="timeline-item right">
+    <h4>🧑‍❤️‍💋‍🧑 İlk Beraber uyuma</h4>
+    <p>14 Şubat 2025</p>
+  </div>
+</div>
+
+<div class="card">
+<iframe src="https://open.spotify.com/embed/playlist/02jDH3PvdMDJJLGLbl0iyA" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+</div>
+
+<div id="modal"><img src=""><div></div></div>
+
+
+<video id="secretVideo" controls>
+  <source src="oneyear.mp4" type="video/mp4">
+  Tarayıcınız video etiketini desteklemiyor.
+</video>
+
+<button id="secretBtn">❤️</button>
+
+<input type="file" id="photoInput" accept="image/*" multiple>
+<button id="uploadBtn" title="Fotoğraf Yükle">📷</button>
+
+<footer>💖 Seni dünden daha çok yarından daha az seviyorum💖</footer>
+
+<script>
+// Cloudinary Bilgileri
+const CLOUD_NAME = 'dinvk61k6'; 
+const UPLOAD_PRESET = 'Fotograf'; 
+const uploadedGallery = document.getElementById('uploadedGallery');
+const uploadBtn = document.getElementById('uploadBtn');
+const photoInput = document.getElementById('photoInput');
+const modal = document.getElementById('modal');
+let modalImg = null;
+if(modal) {
+    modalImg = modal.querySelector('img');
+}
+
+// -----------------------------------------------------
+// YARDIMCI LOCAL STORAGE FONKSİYONLARI (Fotoğraf Kalıcılığı)
+// -----------------------------------------------------
+const STORAGE_KEY = 'tolga_azra_photo_urls';
+
+function getSavedPhotoUrls() {
+    try {
+        const urls = localStorage.getItem(STORAGE_KEY);
+        return urls ? JSON.parse(urls) : [];
+    } catch (e) {
+        console.error("Local Storage okuma hatası:", e);
+        return [];
+    }
+}
+
+function saveNewPhotoUrl(newUrl) {
+    const urls = getSavedPhotoUrls();
+    urls.unshift(newUrl); 
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(urls));
+    } catch (e) {
+        console.error("Local Storage yazma hatası:", e);
+    }
+}
+
+function loadPhotosFromStorage() {
+    const urls = getSavedPhotoUrls();
+    urls.forEach(imageUrl => {
+        appendPhotoToGallery(imageUrl);
+    });
+}
+
+function appendPhotoToGallery(imageUrl) {
+    const newImg = document.createElement('img');
+    newImg.src = imageUrl;
+    newImg.alt = 'Kullanıcı Yüklemesi';
+    
+    uploadedGallery.appendChild(newImg); 
+
+    newImg.onclick = () => {
+        if (modal && modalImg) {
+            modal.style.display = 'flex';
+            modalImg.src = newImg.src;
+        }
+    };
+}
+
+
+// -----------------------------------------------------
+// YIL DÖNÜMÜ KUTLAMA ANİMASYONU (GELİŞTİRİLDİ)
+// -----------------------------------------------------
+// TEST İÇİN BURADAKİ TARİHİ DEĞİŞTİRİN
+const ANNIVERSARY_DATE = "2025-10-06"; 
+// GERÇEK TARİH: "2025-10-18"
+// TEST İÇİN: "2025-10-06" (Bugünün tarihi)
+let effectsInterval; // Normal veya Yoğun efektler için global interval
+
+// Yoğun Kalp, Yüzük ve Pırlanta Yağmuru
+function createAnniversaryEffect(){
+  const el=document.createElement('div');
+  const rand = Math.random();
+  
+  // %45 Kalp, %35 Yüzük, %20 Pırlanta/Elmas
+  if (rand < 0.45) { 
+    el.className = 'heart';
+  } else if (rand < 0.8) { 
+    el.className = 'ring';
+  } else { 
+    el.className = 'diamond';
+  }
+  
+  el.style.left=Math.random()*window.innerWidth+'px';
+  el.style.top='-10px';
+  el.style.width=(Math.random()*6+10)+'px'; 
+  el.style.height=(Math.random()*6+10)+'px';
+  el.style.animationDuration=(4+Math.random()*4)+'s';
+  effects.appendChild(el);
+  setTimeout(()=>{ if(effects.contains(el)) effects.removeChild(el); },8000);
+}
+
+// Havai Fişek Canvas Animasyonu (Roket Fırlatma Eklendi)
+function startAnniversaryCelebration() {
+    const canvas = document.getElementById('fireworksCanvas');
+    if (!canvas) return;
+    
+    canvas.style.display = 'block'; 
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); 
+
+    const fireworks = [];
+    const rockets = []; // YENİ: Roketler için dizi
+    
+    function createParticle(x, y, color) {
+        return {
+            x: x,
+            y: y,
+            radius: Math.random() * 2 + 1,
+            color: color, 
+            velocity: {
+                x: (Math.random() - 0.5) * 6 * Math.random(),
+                y: (Math.random() - 0.5) * 6 * Math.random()
+            },
+            alpha: 1
+        };
+    }
+    
+    const celebrationColors = ['#ff4d88', '#fff', '#ffd700', '#ffb6c1', '#00ffff']; // Pembe, Beyaz, Altın, Aqua
+
+    function createFireworks(x, y, count = 80) { // Parçacık yoğunluğu arttırıldı
+        for (let i = 0; i < count; i++) {
+             const randomColor = celebrationColors[Math.floor(Math.random() * celebrationColors.length)];
+            fireworks.push(createParticle(x, y, randomColor));
+        }
+    }
+
+    // YENİ: Roket Oluşturma
+    function createRocket() {
+        return {
+            x: canvas.width * Math.random(),
+            y: canvas.height, // Aşağıdan başla
+            targetY: canvas.height * (0.1 + Math.random() * 0.5), // Ekranın %10 ile %60'ı arasında bir yerde patla
+            color: celebrationColors[Math.floor(Math.random() * celebrationColors.length)],
+            speed: 4 + Math.random() * 2,
+            trail: [], // İz için
+            exploded: false
+        };
+    }
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Arka planı karartmadan temizle
+        
+        // ROKET ANİMASYONU VE İZİ
+        rockets.forEach((rocket, index) => {
+            if (!rocket.exploded) {
+                rocket.y -= rocket.speed;
+                // İz parçacığı ekle
+                rocket.trail.push({x: rocket.x, y: rocket.y, alpha: 1, radius: 1.5});
+                
+                // Patlama Kontrolü
+                if (rocket.y <= rocket.targetY) {
+                    createFireworks(rocket.x, rocket.y, 80); // Patlama
+                    rocket.exploded = true;
+                }
+            }
+            
+            // İzi Çiz ve Soldur
+            for (let i = rocket.trail.length - 1; i >= 0; i--) {
+                const trailP = rocket.trail[i];
+                if (trailP.alpha <= 0.05) {
+                    rocket.trail.splice(i, 1);
+                } else {
+                    trailP.alpha *= 0.9;
+                    
+                    ctx.save();
+                    ctx.globalAlpha = trailP.alpha;
+                    ctx.beginPath();
+                    ctx.arc(trailP.x, trailP.y, trailP.radius, 0, Math.PI * 2, false);
+                    ctx.fillStyle = rocket.color;
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            // Roketi listeden kaldır
+            if (rocket.exploded && rocket.trail.length === 0) {
+                rockets.splice(index, 1);
+            }
+        });
+        
+        // HAVAI FİŞEK PARÇACIK ANİMASYONU
+        fireworks.forEach((particle, index) => {
+            if (particle.alpha <= 0.05) { 
+                fireworks.splice(index, 1);
+            } else {
+                particle.velocity.y += 0.03; 
+                particle.x += particle.velocity.x;
+                particle.y += particle.velocity.y;
+                particle.alpha *= 0.96; 
+
+                ctx.save();
+                ctx.globalAlpha = particle.alpha;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2, false);
+                ctx.fillStyle = particle.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        });
+        
+        // Rastgele yeni roketler fırlat (Gün boyu sürsün)
+        if (Math.random() < 0.015) { // Roket fırlatma sıklığı
+             rockets.push(createRocket());
+        }
+    }
+    
+    animate();
+    
+    // Yıl dönümünde uçan kalp/yüzük yağmurunu çok daha sık başlat
+    effectsInterval = setInterval(createAnniversaryEffect, 40); 
+}
+
+function checkAnniversaryAndCelebrate() {
+    const today = new Date();
+    const todayDateString = today.toISOString().slice(0, 10); 
+
+    if (todayDateString === ANNIVERSARY_DATE) {
+        
+        // 1. Kutlama Modu Arka Planı (Daha parlak)
+        document.body.style.background = "linear-gradient(to bottom, #ffd700, #ff69b4, #ffb6c1, #ffc0cb)"; 
+        
+        // 2. Havai Fişek, Roket ve Yoğun Kalp Yağmurunu Başlat
+        startAnniversaryCelebration(); 
+        
+        // 3. Countdown yazısını değiştir
+        const countdownEl = document.getElementById("countdown");
+        if (countdownEl) {
+             countdownEl.innerHTML = "<span style='font-size: 32px;'>🥳 MUTLU YIL DÖNÜMÜMÜZ! 🎇</span>";
+        }
+    } else {
+        // Normal Kar/Kalp Efektini Başlat (Yıl dönümü değilse)
+        startNormalEffects(); 
+    }
+}
+// -----------------------------------------------------
+// CLOUDINARY YÜKLEME VE DİĞER BUTON KODLARI
+// -----------------------------------------------------
+
+// Kar ve Kalpler Efekti (Normal - Yıl dönümü değilse)
+function createEffect(){
+  const el=document.createElement('div');
+  el.className=Math.random()<0.7?'snowflake':'heart';
+  el.style.left=Math.random()*window.innerWidth+'px';
+  el.style.top='-10px';
+  el.style.width=(Math.random()*6+4)+'px';
+  el.style.height=(Math.random()*6+4)+'px';
+  el.style.animationDuration=(5+Math.random()*5)+'s';
+  effects.appendChild(el);
+  setTimeout(()=>{ if(effects.contains(el)) effects.removeChild(el); },12000);
+}
+
+function startNormalEffects() {
+    effectsInterval = setInterval(createEffect, 150);
+}
+
+
+// Yükleme Butonu Tıklama
+if (uploadBtn) {
+    uploadBtn.onclick = () => {
+        if (photoInput) photoInput.click();
+    };
+}
+
+// Gizli video parolası butonu
+document.getElementById("secretBtn").onclick = function() {
+  let pwd = prompt("💖 Videoyu görmek için Şifreyi bul 🕵️ ");
+  if(pwd === "chapomantı") {
+    document.getElementById("secretVideo").style.display = "block";
+    document.getElementById("secretVideo").scrollIntoView({behavior:"smooth"});
+  } else {
+    alert("🤠 Yanlış Gülümm!!");
+  }
+};
+
+
+// Dosya seçildiğinde yükleme işlemini başlat
+if (photoInput) {
+    photoInput.onchange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
+
+        alert("Fotoğraf yükleniyor, lütfen bekleyiniz...");
+
+        try {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Cloudinary yükleme hatası: ${errorData.error.message}`);
+            }
+
+            const data = await response.json();
+            const imageUrl = data.secure_url;
+            console.log('Yükleme Başarılı! URL:', imageUrl);
+
+            // URL'i Local Storage'a kaydet
+            saveNewPhotoUrl(imageUrl);
+            
+            // Galeri içeriğini temizle ve tüm fotoğrafları (yenisi dahil) yeniden yükle
+            uploadedGallery.innerHTML = '';
+            loadPhotosFromStorage(); 
+            
+            alert('Fotoğraf başarıyla yüklendi ve galeriye kalıcı olarak eklendi! 🎉');
+
+        } catch (error) {
+            console.error("Yükleme Hatası:", error);
+            alert("Fotoğraf yüklenirken bir hata oluştu.");
+        }
+
+        photoInput.value = '';
+    };
+}
+// -----------------------------------------------------
+// SAYFA AÇILIŞINDA ÇALIŞACAK KOD
+// -----------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Fotoğrafları kalıcı depolamadan çek
+    loadPhotosFromStorage(); 
+    
+    // Yıl dönümü kontrolünü başlat ve uygun efekti çalıştır
+    checkAnniversaryAndCelebrate();
+});
+
+
+// -----------------------------------------------------
+// Geri Kalan Mevcut Zaman Sayacı Kodları
+// -----------------------------------------------------
+
+// Zaman Sayacı
+(function(){
+  const start=new Date("2024-10-18T00:00:00");
+  const now=new Date();
+  const diff=Math.floor((now-start)/(1000*60*60*24));
+  document.getElementById('dayCounterLarge').textContent=isNaN(diff)?"—":diff;
+})();
+
+// Kum Saati
+(function(){
+  const start=new Date("2024-10-18T00:00:00");
+  const end=new Date("2028-10-18T00:00:00");
+  const now=new Date();
+  const total=end-start;
+  const elapsed=now-start;
+  const percent=Math.min(Math.max((elapsed/total)*100,0),100);
+  document.getElementById('hourglassFill').style.height=percent+"%";
+  document.getElementById('hourglassText').textContent=Math.floor(percent)+"% doldu";
+})();
+
+// 1. Yıl Dönümü (Normal Geri Sayım)
+(function(){
+  const countDate=new Date("2025-10-18T23:00:00").getTime();
+  const countdownEl=document.getElementById("countdown");
+  function updateCountdown(){
+    const now=new Date().getTime();
+    const diff=countDate-now;
+    
+    if (diff > 0 && countdownEl.textContent.indexOf('MUTLU') === -1) { 
+        const days=Math.floor(diff/(1000*60*60*24));
+        const hours=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+        const minutes=Math.floor((diff%(1000*60*60))/(1000*60));
+        const seconds=Math.floor((diff%(1000*60))/1000);
+        countdownEl.textContent=days+" gün "+hours+" saat "+minutes+" dakika "+seconds+" saniye";
+    }
+  }
+  updateCountdown();
+  setInterval(updateCountdown,1000);
+})();
+
+// Geleceğime Notum mektup açma
+document.getElementById('note').onclick = function() {
+  const content = document.getElementById('noteContent');
+  const text = document.getElementById('noteText');
+  if(content.style.display === 'none' || content.style.display === '') {
+    content.style.display = 'block';
+    text.style.display = 'none';
+  } else {
+    content.style.display = 'none';
+    text.style.display = 'block';
+  }
+};
+
+// Modal galerisi (Mevcut fotoğraflar için)
+document.querySelectorAll('.gallery img').forEach(img=>{
+  img.onclick=()=>{modal.style.display='flex'; modalImg.src=img.src;}
+});
+modal.onclick=()=>{ modal.style.display='none'; };
+
+
+// Zaman ve Gece Yıldızları Efekti
+(function(){
+  const body = document.body;
+  const starsContainer = document.createElement('div');
+  starsContainer.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;';
+  body.appendChild(starsContainer);
+
+  function createStars(){
+    starsContainer.innerHTML = '';
+    if (window.innerWidth < 600) return;
+    for(let i=0;i<100;i++){
+      const star = document.createElement('div');
+      star.style.cssText = `position:absolute; width:${Math.random()*2+1}px; height:${Math.random()*2+1}px; background:white; border-radius:50%; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:${Math.random()}; animation:twinkle ${2+Math.random()*3}s infinite alternate;`;
+      starsContainer.appendChild(star);
+    }
+  }
+
+  function updateBackground(){
+    const hour = new Date().getHours();
+    starsContainer.style.display = 'none';
+
+    if(hour >= 6 && hour < 12){
+      body.style.background = "linear-gradient(#a0c4ff, #f0f8ff)"; // sabah
+    } else if(hour >= 12 && hour < 18){
+      body.style.background = "linear-gradient(#fff4a3, #ffd27f)"; // öğlen
+    } else if(hour >= 18 && hour < 21){
+      body.style.background = "linear-gradient(#ffb347, #ff7e5f)"; // akşam
+    } else {
+      body.style.background = "linear-gradient(#0f2027, #2c5364)"; // gece
+      starsContainer.style.display = 'block';
+      createStars();
+    }
+  }
+  
+  // Sadece yıl dönümü değilse normal arkaplanı güncelle
+  if (new Date().toISOString().slice(0, 10) !== ANNIVERSARY_DATE) {
+    updateBackground();
+    setInterval(updateBackground, 60000); 
+  }
+})();
+</script>
+
+</body>
+</html>
